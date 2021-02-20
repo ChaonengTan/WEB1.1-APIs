@@ -52,13 +52,16 @@ def results():
         # TODO: Enter query parameters here for the 'appid' (your api key),
         # the city, and the units (metric or imperial).
         # See the documentation here: https://openweathermap.org/current
+        'appid': API_KEY,
+        'q': city,
+        'units': units
 
     }
 
     result_json = requests.get(API_URL, params=params).json()
 
     # Uncomment the line below to see the results of the API call!
-    # pp.pprint(result_json)
+    pp.pprint(f'{result_json}')
 
     # TODO: Replace the empty variables below with their appropriate values.
     # You'll need to retrieve these from the result_json object above.
@@ -68,13 +71,13 @@ def results():
     # function.
     context = {
         'date': datetime.now(),
-        'city': '',
-        'description': '',
-        'temp': '',
-        'humidity': '',
-        'wind_speed': '',
-        'sunrise': '',
-        'sunset': '',
+        'city': result_json['name'],
+        'description': result_json['weather'][0]['description'],
+        'temp': result_json['main']['temp'],
+        'humidity': result_json['main']['humidity'],
+        'wind_speed': result_json['wind']['speed'],
+        'sunrise': results_json['sys']['sunrise'],
+        'sunset': result_json['sys']['sunset'],
         'units_letter': get_letter_for_units(units)
     }
 
