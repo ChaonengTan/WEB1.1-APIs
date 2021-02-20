@@ -61,7 +61,7 @@ def results():
     result_json = requests.get(API_URL, params=params).json()
 
     # Uncomment the line below to see the results of the API call!
-    pp.pprint(f'{result_json}')
+    # pp.pprint(f'{result_json}')
 
     # TODO: Replace the empty variables below with their appropriate values.
     # You'll need to retrieve these from the result_json object above.
@@ -69,6 +69,27 @@ def results():
     # For the sunrise & sunset variables, I would recommend to turn them into
     # datetime objects. You can do so using the `datetime.fromtimestamp()` 
     # function.
+
+
+    # results.json:
+    # ("
+    # {
+    # 'coord': {'lon': -83.3999, 'lat': 42.6667}, 
+    # 'weather': [{'id': 804, 'main': ""'Clouds', 'description': 'overcast clouds', 'icon': '04n'}],
+    #  'base': ""'stations',
+    #  'main': {'temp': -8.56, 'feels_like': -15.03, 'temp_min': -8.89, ""'temp_max': -8, 'pressure': 1022, 'humidity': 73},
+    #  'visibility': 10000,
+    #  ""'wind': {'speed': 4.63, 'deg': 270},
+    #  'clouds': {'all': 90},
+    #  'dt': ""1613799341,
+    #  'sys': {'type': 1, 'id': 5424, 'country': 'US', 'sunrise': ""1613823789, 'sunset': 1613862706},
+    #  'timezone': -18000,
+    #  'id': 5004223,
+    #  ""'name': 'Oakland',
+    #  'cod': 200
+    # }
+    # ")
+
     context = {
         'date': datetime.now(),
         'city': result_json['name'],
@@ -76,7 +97,7 @@ def results():
         'temp': result_json['main']['temp'],
         'humidity': result_json['main']['humidity'],
         'wind_speed': result_json['wind']['speed'],
-        'sunrise': results_json['sys']['sunrise'],
+        'sunrise': result_json['sys']['sunrise'],
         'sunset': result_json['sys']['sunset'],
         'units_letter': get_letter_for_units(units)
     }
@@ -89,19 +110,49 @@ def comparison_results():
     """Displays the relative weather for 2 different cities."""
     # TODO: Use 'request.args' to retrieve the cities & units from the query
     # parameters.
-    city1 = ''
-    city2 = ''
-    units = ''
+    city1 = request.args.get('city1')
+    city2 = request.args.get('city2')
+    units = request.args.get('units')
 
     # TODO: Make 2 API calls, one for each city. HINT: You may want to write a 
     # helper function for this!
 
+    params1 = {
+        'appid': API_KEY,
+        'q': city1,
+        'units': units
+    }
+    city1Json = requests.get(API_URL, params=params1).json()
+    params2 = {
+        'appid': API_KEY,
+        'q': city2,
+        'units': units
+    }
+    city2Json = requests.get(API_URL, params=params2).json()
 
     # TODO: Pass the information for both cities in the context. Make sure to
     # pass info for the temperature, humidity, wind speed, and sunset time!
     # HINT: It may be useful to create 2 new dictionaries, `city1_info` and 
     # `city2_info`, to organize the data.
+    def ifNeg(value):
+        if value < 0:
+            return 'Lower'
+        return 'Greater'
     context = {
+        'date': datetime.now(),
+        'city1name': city1Json['name'],
+        'city2name': city2Json['name'],
+        'units': units,
+        'cityDiff': {
+            'temp': abs(city1Json['main']['temp'] - city2Json['main']['temp']),
+            'tempNeg': ifNeg(city1Json['main']['temp'] - city2Json['main']['temp']),
+            'humidity': abs(city1Json['main']['humidity'] - city2Json['main']['humidity']),
+            'humidityNeg': ifNeg(city1Json['main']['humidity'] - city2Json['main']['humidity']),
+            'windSpeed': abs(city1Json['wind']['speed'] - city2Json['wind']['speed']),
+            'windSpeedNeg': ifNeg(city1Json['wind']['speed'] - city2Json['wind']['speed']),
+            'sunsetTime': abs(city1Json['sys']['sunset'] - city2Json['sys']['sunset']),
+            'sunsetTimeNeg': ifNeg(city1Json['sys']['sunset'] - city2Json['sys']['sunset'])
+        }
 
     }
 
